@@ -25,7 +25,6 @@ public class User extends Thread {
         try{
             InputStream input=this.client.getInputStream();
             BufferedReader reader=new BufferedReader(new InputStreamReader(input));
-
             OutputStream out=this.client.getOutputStream();
             writer=new PrintWriter(out,true);
 
@@ -37,12 +36,24 @@ public class User extends Thread {
             System.out.println("Новое подключение: "+this.userName);
 
             do{
-                System.out.println(gson.fromJson(reader.readLine(),Message.class));
                 clientMessage=gson.fromJson(reader.readLine(),Message.class);
                 System.out.println(clientMessage.toString());
-                sendMessage("pong");
+                switch (clientMessage.getTextAdmin()) {
+                    case "msg":
+                        server.broadcast(clientMessage);
+                        break;
+                    case "textInput":
+                        server.broadcast(new Message("Печатает", clientMessage.getName(), "textInput"));
+                        break;
+                    case "textOver":
+                        server.broadcast(new Message("", clientMessage.getName(), "textOver"));
+                        break;
+                    case "ping":
+                        server.broadcast(new Message("pong", clientMessage.getName(), "pong"));
+                        break;
+                }
             }
-            while (!clientMessage.getText().equals("disconnect"));
+            while (!(clientMessage.getTextAdmin() != null && clientMessage.getTextAdmin().equals("disconnect")));
             disconnect();
             System.out.println("Пользователь отключился: "+this.userName);
 
@@ -54,7 +65,7 @@ public class User extends Thread {
 
     public void disconnect(){
         try {
-            this.sendMessage("disconnected");
+            this.sendMessage(new Message("disconnect",this.userName,"disconnect"));
             this.client.close();
             this.server.removeUser(this);
         }
@@ -63,9 +74,9 @@ public class User extends Thread {
         }
     }
 
-    public void sendMessage(String message){
+    public void sendMessage(Message message){
         //DO send message
-        writer.println(gson.toJson(new Message(message,this.userName)));
+        writer.println(gson.toJson(message));
     }
 
     public String getUserName() {

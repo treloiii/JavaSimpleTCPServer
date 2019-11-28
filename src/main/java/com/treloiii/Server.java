@@ -43,7 +43,7 @@ public class Server {
             }
         }
     }
-    public void broadcast(String message){
+    public void broadcast(Message message){
         for (User user:users) {
             user.sendMessage(message);
         }
