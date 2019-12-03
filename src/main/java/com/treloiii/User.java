@@ -23,6 +23,7 @@ public class User extends Thread {
     public void run() {
 
         try{
+
             InputStream input=this.client.getInputStream();
             BufferedReader reader=new BufferedReader(new InputStreamReader(input));
             OutputStream out=this.client.getOutputStream();
@@ -40,16 +41,19 @@ public class User extends Thread {
                 System.out.println(clientMessage.toString());
                 switch (clientMessage.getTextAdmin()) {
                     case "msg":
+                    case "msgImage":
+                    case "Image":
                         server.broadcast(clientMessage);
                         break;
+
                     case "textInput":
-                        server.broadcast(new Message("Печатает", clientMessage.getName(), "textInput"));
+                        server.broadcast(new Message("Печатает", clientMessage.getName(), "textInput",null));
                         break;
                     case "textOver":
-                        server.broadcast(new Message("", clientMessage.getName(), "textOver"));
+                        server.broadcast(new Message("", clientMessage.getName(), "textOver",null));
                         break;
                     case "ping":
-                        server.broadcast(new Message("pong", clientMessage.getName(), "pong"));
+                        server.broadcast(new Message("pong", clientMessage.getName(), "pong",null));
                         break;
                 }
             }
@@ -65,7 +69,7 @@ public class User extends Thread {
 
     public void disconnect(){
         try {
-            this.sendMessage(new Message("disconnect",this.userName,"disconnect"));
+            this.sendMessage(new Message("disconnect",this.userName,"disconnect",null));
             this.client.close();
             this.server.removeUser(this);
         }
